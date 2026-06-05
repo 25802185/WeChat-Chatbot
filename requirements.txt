@@ -1,0 +1,4 @@
+wcferry
+openai
+pyyaml
+pytest
