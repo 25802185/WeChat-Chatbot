@@ -31,3 +31,16 @@ def test_build_system_prompt_with_long_term_memory():
 
     assert "8月15日" in prompt
     assert "吃辣" in prompt
+
+def test_build_system_prompt_contains_emoji_guide():
+    cfg = {
+        "name": "小柔",
+        "age": 22,
+        "personality": "温柔体贴",
+        "speaking_style": "口语化",
+        "background": "认识的",
+    }
+    prompt = build_system_prompt(cfg)
+
+    assert "emoji" in prompt.lower() or "Emoji" in prompt
+    assert "😊" in prompt or "💕" in prompt
