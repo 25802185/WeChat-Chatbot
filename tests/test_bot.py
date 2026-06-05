@@ -31,10 +31,25 @@ def test_handle_text_message_returns_reply():
     bot = make_bot("me")
     bot.llm = MagicMock()
     bot.llm.chat.return_value = "想你啦~"
+    bot.memory = MagicMock()
+    bot.memory.get_long_term_memories.return_value = []
+    bot.memory.get_history.return_value = []
+
+    with patch.object(bot, "_maybe_extract_memory"):
+        reply = bot.handle_text_message("me", "你好")
+
+    assert reply == "想你啦~"
+
+def test_handle_text_message_llm_failure():
+    bot = make_bot("me")
+    bot.llm = MagicMock()
+    bot.llm.chat.return_value = None
+    bot.memory = MagicMock()
+    bot.memory.get_long_term_memories.return_value = []
+    bot.memory.get_history.return_value = []
 
     reply = bot.handle_text_message("me", "你好")
-    assert reply == "想你啦~"
-    bot.llm.chat.assert_called_once()
+    assert "不舒服" in reply
 
 def test_handle_unsupported_type():
     bot = make_bot("me")

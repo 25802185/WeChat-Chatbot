@@ -18,9 +18,9 @@ class Bot:
     def should_handle(self, sender: str) -> bool:
         return sender == self.user_wxid
 
-    def handle_message(self, sender: str, content: str, msg_type: int = 1) -> str:
+    def handle_message(self, sender: str, content: str, msg_type: int = 1) -> str | None:
         if not self.should_handle(sender):
-            return ""
+            return None
 
         if msg_type != 1:  # 非文字消息
             return "人家看不懂嘛~发文字给我好不好"
@@ -36,5 +36,27 @@ class Bot:
 
         reply = self.llm.chat(system_prompt, history)
 
+        if reply is None:
+            return "我现在有点不舒服，等会儿再聊好不好~"
+
         self.memory.add_message(sender, "assistant", reply)
+        self._maybe_extract_memory(history, reply)
         return reply
+
+    def _maybe_extract_memory(self, history: list[dict], latest_reply: str):
+        if len(history) % 20 != 0:
+            return
+
+        recent = history[-10:]
+        conversation = "\n".join(f"{m['role']}: {m['content']}" for m in recent)
+        extract_prompt = (
+            '从以下对话中提取关于用户的重要个人信息（生日、喜好、习惯、重要事件等）。'
+            '每条信息一行，格式为简短陈述句。如果没有值得记录的信息，回复"无"。\n\n'
+            f'{conversation}'
+        )
+        result = self.llm.chat(extract_prompt, [])
+        if result and "无" not in result:
+            for line in result.strip().split("\n"):
+                line = line.strip().lstrip("- ")
+                if line:
+                    self.memory.add_long_term_memory(line)
