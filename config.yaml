@@ -16,14 +16,12 @@ character:
     你喜欢追剧、吃甜食，偶尔会因为小事生闷气。
 
 llm:
-  api_key: "sk-your-key-here"
+  api_key: "sk-b4a0c28910c44960985d32476ede978a"
   base_url: "https://api.deepseek.com"
   model: "deepseek-v4-pro"
   max_tokens: 1024
   temperature: 0.85
 
-user:
-  wechat_id: "your_wechat_id"
-
-wcf:
-  port: 10086
+weixin:
+  bot_type: "3"
+  data_dir: "data"

@@ -1,4 +1,5 @@
-wcferry
 openai
 pyyaml
 pytest
+requests
+qrcode
