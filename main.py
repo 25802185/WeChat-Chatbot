@@ -5,6 +5,7 @@ import logging
 from config import load_config
 from bot import Bot
 from weixin_api import WeixinApi, extract_text
+from messenger import send_reply
 from skills import create_default_skills
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -63,15 +64,30 @@ def main():
 
             log.info(f"收到消息 [{sender}]: {text[:50]}...")
 
+            if text.strip() in ("刷新配置", "重载配置", "刷新人设"):
+                try:
+                    old_name = bot.character_cfg.get("name", "未知")
+                    new_cfg = load_config()
+                    new_name = new_cfg["character"]["name"]
+                    log.info(f"刷新配置: 旧名字={old_name}, 新名字={new_name}")
+                    bot.reload_config(new_cfg)
+                    reply = f"配置已刷新！\n旧名字：{old_name}\n新名字：{new_name}"
+                    send_reply(api, sender, reply, context_token)
+                    log.info(f"配置已刷新 by [{sender}]")
+                except Exception as e:
+                    send_reply(api, sender, f"配置刷新失败：{e}", context_token)
+                    log.error(f"配置刷新失败: {e}")
+                continue
+
             skill_reply = skills.check_command(text)
             if skill_reply:
-                api.send_message(sender, skill_reply, context_token)
+                send_reply(api, sender, skill_reply, context_token)
                 log.info(f"技能回复 [{sender}]: {skill_reply[:50]}...")
                 continue
 
             reply = bot.handle_text_message(sender, text)
             if reply:
-                if api.send_message(sender, reply, context_token):
+                if send_reply(api, sender, reply, context_token):
                     log.info(f"已回复 [{sender}]: {reply[:50]}...")
                 else:
                     log.error(f"回复失败 [{sender}]")

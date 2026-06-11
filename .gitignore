@@ -4,3 +4,7 @@ __pycache__/
 data/
 config.yaml
 .idea/
+.claude/
+package/
+injector.log
+*.tgz

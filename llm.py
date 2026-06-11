@@ -1,3 +1,4 @@
+import httpx
 import logging
 from openai import OpenAI
 
@@ -6,7 +7,8 @@ log = logging.getLogger(__name__)
 class LLM:
     def __init__(self, api_key: str, base_url: str, model: str = "deepseek-v4-pro",
                  max_tokens: int = 1024, temperature: float = 0.85):
-        self.client = OpenAI(api_key=api_key, base_url=base_url)
+        http_client = httpx.Client(verify=False)
+        self.client = OpenAI(api_key=api_key, base_url=base_url, http_client=http_client)
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
